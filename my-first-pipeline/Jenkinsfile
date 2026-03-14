@@ -22,8 +22,12 @@ pipeline {
 
         stage('Run Pod') {
             agent {
-                docker { image 'bitnami/kubectl:latest' }
+                docker {
+                image 'bitnami/kubectl:latest'
+                    args '--entrypoint=""'   // disable image entrypoint
             }
+            }
+        
             steps {
                 writeFile file: 'pod.yml', text: '''
 apiVersion: v1
