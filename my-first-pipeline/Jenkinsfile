@@ -11,18 +11,20 @@ pipeline {
         stage('Setup Kubernetes') {
             steps {
                 sh '''
-                  # Install kubectl if not already present
-                  if ! command -v kubectl >/dev/null 2>&1; then
-                    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-                    install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-                  fi
+                  mkdir -p $WORKSPACE/bin
+                  curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                  mv kubectl $WORKSPACE/bin/kubectl
+                  chmod +x $WORKSPACE/bin/kubectl
+                  export PATH=$WORKSPACE/bin:$PATH
                 '''
             }
         }
 
         stage('Run Pod') {
+            agent {
+                docker { image 'bitnami/kubectl:latest' }
+            }
             steps {
-                // Apply a simple pod manifest
                 writeFile file: 'pod.yml', text: '''
 apiVersion: v1
 kind: Pod
