@@ -9,8 +9,13 @@ pipeline {
       }
     }
     stage('Dev') {
-      steps {
-        sh 'kubectl apply -f deployment.yml'
+  agent {
+    docker {
+      image 'lachlanevenson/k8s-kubectl:v1.27.3'
+    }
+  }
+  steps {
+    sh 'kubectl apply -f deployment.yml'
   }
 }
   }
