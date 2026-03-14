@@ -8,25 +8,35 @@ pipeline {
             }
         }
 
-        stage('Build & Test') {
-            agent { docker { image 'node:16-alpine' } }
+        stage('Setup Kubernetes') {
             steps {
                 sh '''
-                  # adjust path if package.json is in a subfolder
-                  if [ -f package.json ]; then
-                    npm install
-                    npm test
-                  else
-                    echo "No package.json found, skipping npm install"
+                  # Install kubectl if not already present
+                  if ! command -v kubectl >/dev/null 2>&1; then
+                    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+                    install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
                   fi
                 '''
             }
         }
 
-        stage('Deploy') {
-            agent { docker { image 'bitnami/kubectl:latest' } }
+        stage('Run Pod') {
             steps {
-                sh 'kubectl apply -f deployment.yml'
+                // Apply a simple pod manifest
+                writeFile file: 'pod.yml', text: '''
+apiVersion: v1
+kind: Pod
+metadata:
+  name: my-simple-pod
+spec:
+  containers:
+  - name: my-container
+    image: nginx:latest
+    ports:
+    - containerPort: 80
+'''
+                sh 'kubectl apply -f pod.yml'
+                sh 'kubectl get pods'
             }
         }
     }
