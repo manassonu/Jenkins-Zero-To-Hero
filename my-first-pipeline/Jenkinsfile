@@ -1,22 +1,35 @@
 pipeline {
-  agent {
-    docker { image 'node:16-alpine' }
-  }
-  stages {
-    stage('Test') {
-      steps {
-        sh 'node --version'
-      }
+    agent any
+
+    stages {
+        stage('Checkout') {
+            steps {
+                git url: 'https://github.com/manassonu/Jenkins-Zero-To-Hero.git', branch: 'main'
+            }
+        }
+
+        stage('Build & Test') {
+            agent {
+                docker {
+                    image 'node:16-alpine'
+                }
+            }
+            steps {
+                sh 'node --version'
+                sh 'npm install'
+                sh 'npm test'
+            }
+        }
+
+        stage('Deploy') {
+            agent {
+                docker {
+                    image 'bitnami/kubectl:latest'
+                }
+            }
+            steps {
+                sh 'kubectl apply -f deployment.yml'
+            }
+        }
     }
-    stage('Dev') {
-  agent {
-    docker {
-      image 'lachlanevenson/k8s-kubectl:v1.27.3'
-    }
-  }
-  steps {
-    sh 'kubectl apply -f deployment.yml'
-  }
-}
-  }
 }
