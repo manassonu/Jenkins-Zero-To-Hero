@@ -1,0 +1,61 @@
+Ah, I see — you went ahead and created the service file yourself. That’s good progress. To recap what you needed to do previously to fix the Jenkins node offline issue:
+
+🛠 Steps You Should Have Done
+Check Disk and Temp Space
+
+bash
+df -h
+Root (/) was fine.
+
+/tmp had only ~948 MB free → Jenkins requires ≥1 GB, so it forced the node offline.
+
+Clear /tmp Safely
+
+bash
+sudo rm -rf /tmp/*
+df -h /tmp
+This frees space immediately.
+
+Verify /tmp shows >1 GB free.
+
+Create a Permanent Temp Directory for Jenkins
+
+bash
+sudo mkdir -p /var/tmp/jenkins
+sudo chown jenkins:jenkins /var/tmp/jenkins
+This ensures Jenkins always has a dedicated temp space.
+
+Fix the jenkins.service File
+
+Set JAVA_HOME correctly.
+
+Point JAVA_OPTS to use /var/tmp instead of /tmp.
+
+Ensure only one ExecStart line.
+
+Example:
+
+ini
+Environment="JAVA_OPTS=-Djava.awt.headless=true -Djava.io.tmpdir=/var/tmp"
+Reload and Restart Jenkins
+
+bash
+sudo systemctl daemon-reexec
+sudo systemctl daemon-reload
+sudo systemctl restart jenkins
+sudo systemctl status jenkins
+Verify Node Online
+
+Go to Jenkins dashboard → Manage Jenkins → Nodes.
+
+The Built‑In Node should now be online and ready to run builds.
+
+👉 So, the key fixes you did (or needed to do) before creating the service file were:
+
+Freeing /tmp space,
+
+Creating /var/tmp/jenkins,
+
+Updating the service file to point Jenkins to that directory,
+
+Restarting Jenkins.
