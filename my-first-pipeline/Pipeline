@@ -13,12 +13,7 @@ pipeline {
         sh 'node --version'
       }
     }
-    // Comment out or skip Kubernetes until cluster is ready
-    // stage('Run Pod') {
-    //   steps {
-    //     sh 'kubectl apply -f pod.yml'
-    //   }
-    // }
   }
 }
+
 
