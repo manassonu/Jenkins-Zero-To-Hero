@@ -8,5 +8,13 @@ pipeline {
         sh 'node --version'
       }
     }
+    stage('Run Pod') {
+      when {
+        expression { fileExists('pod.yml') && sh(script: "kubectl cluster-info", returnStatus: true) == 0 }
+      }
+      steps {
+        sh 'kubectl apply -f pod.yml'
+      }
+    }
   }
 }
