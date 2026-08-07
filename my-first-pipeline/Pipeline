@@ -8,12 +8,14 @@ pipeline {
         checkout scm
       }
     }
-    stage('Test') {
+    stage('Test Node') {
       steps {
         sh 'node --version'
+        sh 'echo "SCM + Docker pipeline works!"'
       }
     }
   }
 }
+
 
 
